@@ -8,4 +8,6 @@ RUN ["npm", "install"]
 
 COPY . .
 
+USER nobody
+
 CMD [ "node", "app.js" ]

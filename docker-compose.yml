@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - database
+    env_file: .env
+  database:
+    container_name: mariadb
+    image: mariadb:11.4
+    environment:
+      MARIADB_ROOT_HOST: ${DB_HOST}
+      MARIADB_ROOT_USER: ${DB_ROOT_USER:-root}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_DATABASE: ${DB_DATABASE}
+    volumes:
+      - db-data:/var/lib/mysql:rw
+
+volumes:
+  db-data:
+
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        # If you get an error saying "Error response from daemon: could not find an available, non-overlapping IPv4 address pool among the defaults to assign to the network"
+        # Run ifconfig and find a range unused on your machine.
+        # The reason for this error is that docker will try to use VPN range by default, and conflict with openfortivpn.
+        # - see https://docs.storagemadeeasy.com/appliance/docker_networking
+        - subnet: 172.27.0.0/16
