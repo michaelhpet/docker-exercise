@@ -4,20 +4,23 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - database
+      mariadb:
+        condition: service_healthy
+        restart: true
     env_file: .env
-  database:
-    container_name: mariadb
+  mariadb:
     image: mariadb:11.4
     environment:
-      MARIADB_ROOT_HOST: ${DB_HOST}
-      MARIADB_ROOT_USER: ${DB_ROOT_USER:-root}
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
       MARIADB_USER: ${DB_USERNAME}
       MARIADB_PASSWORD: ${DB_PASSWORD}
       MARIADB_DATABASE: ${DB_DATABASE}
     volumes:
       - db-data:/var/lib/mysql:rw
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      retries: 3
+      timeout: 5s
 
 volumes:
   db-data:
